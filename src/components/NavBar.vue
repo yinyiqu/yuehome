@@ -257,7 +257,7 @@ onBeforeUnmount(() => {
   /* 花体数学字母（𝓫𝓮𝓲𝔂𝓾𝓮）优先用带该字符集的字体，避免落到方块 */
   font-family: 'Cambria Math', 'STIX Two Math', 'Noto Sans Math', 'Segoe UI Symbol',
     'Apple Symbols', var(--font-sans);
-  font-size: 1.12rem;
+  font-size: 1.5rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
