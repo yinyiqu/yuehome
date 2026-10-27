@@ -12,6 +12,7 @@ Vue 3 + Vite，无 UI 框架，样式手写。
 - **响应式**：≥720px 是 16:9 横卡 + 左侧车道；窄屏是 9:16 竖卡，只保留进场发牌动画，悬停与按下都不位移
 - **主题**：深色 / 浅色，跟随系统，手动切换后记忆
 - **内置模拟器**：`/GameBoyLive/` 是一台跑在浏览器里的 GB / GBC / GBA，虚拟按键改成了 Switch Joy-Con 的左蓝右红
+- **MD5 修改**：`/md5/` 给文件末尾追加几个字节，指纹立刻换一个，文件照常打开；纯前端，文件不上传
 
 ## 结构
 
@@ -25,6 +26,7 @@ yuehome/
 │  └─ styles/card.css  卡面样式
 ├─ public/
 │  ├─ GameBoyLive/     模拟器构建产物
+│  ├─ md5/             MD5 修改工具（纯静态）
 │  ├─ og.jpg           分享预览图
 │  └─ favicon.svg
 ├─ .github/workflows/  GitHub Pages 自动部署

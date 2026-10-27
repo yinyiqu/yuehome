@@ -104,6 +104,15 @@ const SAMPLES = [
     url: 'https://www.iamwawa.cn/fontchanger.html',
     emoji: 'Aa',
     hue: 100
+  },
+  {
+    id: 'md5',
+    name: 'MD5 修改',
+    en: 'MD5 Editor',
+    tag: '工具',
+    desc: '末尾添几个字节，文件指纹就换了一个。',
+    url: `${import.meta.env.BASE_URL}md5/`,
+    hue: 190
   }
 ]
 
