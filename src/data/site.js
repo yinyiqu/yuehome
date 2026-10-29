@@ -110,7 +110,7 @@ const SAMPLES = [
     name: 'MD5 修改',
     en: 'MD5 Editor',
     tag: '工具',
-    desc: '末尾添几个字节，文件指纹就换了一个。',
+    desc: '末尾添几个字节，文件指纹就换了一个，支持批量。',
     url: `${import.meta.env.BASE_URL}md5/`,
     hue: 190
   }
