@@ -60,6 +60,7 @@
   --accent-soft: rgba(238, 197, 132, 0.14);
 
   --shadow-card: 0 28px 52px -30px rgba(0, 0, 0, 0.9), 0 10px 22px -16px rgba(0, 0, 0, 0.7);
+  --grid-line: rgba(255, 255, 255, 0.18);
 }
 
 :root[data-theme='light'] {
@@ -84,6 +85,7 @@
   --accent-soft: rgba(169, 114, 44, 0.1);
 
   --shadow-card: 0 26px 48px -30px rgba(60, 45, 30, 0.35), 0 10px 22px -18px rgba(60, 45, 30, 0.22);
+  --grid-line: rgba(22, 20, 25, 0.12);
 }
 
 *,
