@@ -168,18 +168,27 @@ onBeforeUnmount(() => {
 
 .nav--scrolled {
   padding-block: 12px;
-  /* iOS 导航栏材质：saturate(180%) + blur(20px)，底色半透明，只留一条发丝线 */
-  background: var(--ios-bar);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  /* 发丝线用 inset 阴影画，不占高度，吸顶的搜索栏才能和它严丝合缝地拼上 */
+  /* iOS 导航栏材质：更低的底色 + 更高的模糊与饱和，
+     背后的彩卡滚过去时要能真的透出颜色来 */
+  background-color: var(--nav-glass);
+  /* 一层极淡的顶部高光：背后是空背景时也能看出「有一块玻璃在这儿」 */
+  background-image: var(--nav-sheen);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
   border-bottom-color: transparent;
-  box-shadow: inset 0 -1px 0 var(--ios-hairline);
+  box-shadow: inset 0 1px 0 var(--nav-highlight), inset 0 -1px 0 var(--ios-hairline);
 }
 
 @media (min-resolution: 2dppx) {
   .nav--scrolled {
-    box-shadow: inset 0 -0.5px 0 var(--ios-hairline);
+    box-shadow: inset 0 0.5px 0 var(--nav-highlight), inset 0 -0.5px 0 var(--ios-hairline);
+  }
+}
+
+/* 不支持背景模糊时退回不透明底，保证文字可读 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav--scrolled {
+    background: var(--surface-solid);
   }
 }
 

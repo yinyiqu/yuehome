@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   count: { type: Number, default: 0 },
@@ -11,36 +11,6 @@ const emit = defineEmits(['update:modelValue', 'shuffle'])
 const input = ref(null)
 const focused = ref(false)
 
-/**
- * 搜索栏吸顶：滚到顶栏下方时钉住，并换成 iOS 导航栏材质。
- * 顶栏滚动后的高度是 34（内容）+ 12×2（内边距）= 58。
- */
-const NAV_H = 58
-const bar = ref(null)
-const stuck = ref(false)
-let raf = 0
-
-function onScroll() {
-  if (raf) return
-  raf = requestAnimationFrame(() => {
-    raf = 0
-    const el = bar.value
-    if (!el) return
-    // 吸顶后元素顶边被钉在 NAV_H 上，据此判断是否已「贴上去」
-    stuck.value = el.getBoundingClientRect().top <= NAV_H + 1
-  })
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true })
-  onScroll()
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll)
-  if (raf) cancelAnimationFrame(raf)
-})
-
 const clear = () => {
   emit('update:modelValue', '')
   input.value?.focus()
@@ -50,7 +20,7 @@ defineExpose({ focus: () => input.value?.focus() })
 </script>
 
 <template>
-  <div ref="bar" class="bar" :class="{ 'bar--stuck': stuck }">
+  <div class="bar">
     <label class="search" :class="{ 'is-focused': focused }">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <circle cx="11" cy="11" r="7" />
@@ -88,10 +58,6 @@ defineExpose({ focus: () => input.value?.focus() })
 
 <style scoped>
 .bar {
-  /* 吸顶：滚到顶栏下沿就钉住，卡片从下面穿过 */
-  position: sticky;
-  top: 58px;
-  z-index: 60;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -101,62 +67,6 @@ defineExpose({ focus: () => input.value?.focus() })
   margin-inline: auto;
   /* 与 deck-root 完全一致的内边距，搜索框左缘与容器对齐 */
   padding: 0 clamp(16px, 4vw, 32px) clamp(16px, 2.2vw, 24px);
-  transition: padding var(--dur-base) var(--ease-out);
-}
-
-/* 吸顶状态下把上下留白收成对称的 10px，让玻璃条高度稳定在 58 */
-.bar--stuck {
-  padding-block: 10px;
-}
-
-/* iOS 材质层：横贯整屏，模糊从下面滚过的卡片 */
-.bar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: var(--ios-bar);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--ios-hairline);
-  opacity: 0;
-  transition: opacity var(--dur-base) var(--ease-out);
-  pointer-events: none;
-  z-index: -1;
-}
-
-.bar--stuck::before {
-  opacity: 1;
-}
-
-/* 吸顶后搜索框换 iOS 的填充灰：不再自带模糊，靠底下的材质透出来 */
-.bar--stuck .search,
-.bar--stuck .shuffle {
-  background: var(--ios-fill);
-  border-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-.bar--stuck .search {
-  color: var(--text-2);
-}
-.bar--stuck .search:hover,
-.bar--stuck .shuffle:hover {
-  border-color: transparent;
-  color: var(--text);
-}
-.bar--stuck .search.is-focused {
-  border-color: color-mix(in oklab, var(--accent) 45%, transparent);
-  background: var(--ios-fill);
-}
-
-@media (min-resolution: 2dppx) {
-  .bar--stuck::before {
-    border-bottom-width: 0.5px;
-  }
 }
 
 .search {
