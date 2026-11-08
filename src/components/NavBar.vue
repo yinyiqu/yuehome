@@ -168,13 +168,9 @@ onBeforeUnmount(() => {
 
 .nav--scrolled {
   padding-block: 12px;
-  /* iOS 导航栏材质：更低的底色 + 更高的模糊与饱和，
-     背后的彩卡滚过去时要能真的透出颜色来 */
+  /* 透明玻璃：只加一层很薄的暗底，不模糊 —— 背后滚过去的东西保持清晰 */
   background-color: var(--nav-glass);
-  /* 一层极淡的顶部高光：背后是空背景时也能看出「有一块玻璃在这儿」 */
   background-image: var(--nav-sheen);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
   border-bottom-color: transparent;
   box-shadow: inset 0 1px 0 var(--nav-highlight), inset 0 -1px 0 var(--ios-hairline);
 }
@@ -185,12 +181,6 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 不支持背景模糊时退回不透明底，保证文字可读 */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .nav--scrolled {
-    background: var(--surface-solid);
-  }
-}
 
 .nav__inner {
   width: 100%;
