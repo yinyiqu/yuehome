@@ -168,11 +168,19 @@ onBeforeUnmount(() => {
 
 .nav--scrolled {
   padding-block: 12px;
-  background: var(--surface);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border-bottom-color: var(--line);
-  box-shadow: 0 12px 32px -24px rgba(0, 0, 0, 0.6);
+  /* iOS 导航栏材质：saturate(180%) + blur(20px)，底色半透明，只留一条发丝线 */
+  background: var(--ios-bar);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  /* 发丝线用 inset 阴影画，不占高度，吸顶的搜索栏才能和它严丝合缝地拼上 */
+  border-bottom-color: transparent;
+  box-shadow: inset 0 -1px 0 var(--ios-hairline);
+}
+
+@media (min-resolution: 2dppx) {
+  .nav--scrolled {
+    box-shadow: inset 0 -0.5px 0 var(--ios-hairline);
+  }
 }
 
 .nav__inner {
@@ -259,6 +267,8 @@ onBeforeUnmount(() => {
     'Apple Symbols', var(--font-sans);
   font-size: 1.5rem;
   font-weight: 500;
+  /* 行高收到 1：花体字体的默认行高偏大，会把顶栏撑高，吸顶计算就对不上了 */
+  line-height: 1;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }

@@ -60,7 +60,11 @@
   --accent-soft: rgba(238, 197, 132, 0.14);
 
   --shadow-card: 0 28px 52px -30px rgba(0, 0, 0, 0.9), 0 10px 22px -16px rgba(0, 0, 0, 0.7);
-  --grid-line: rgba(255, 255, 255, 0.18);
+
+  /* iOS 顶栏材质：半透明底 + 高饱和模糊 + 半像素发丝线 */
+  --ios-bar: rgba(28, 28, 30, 0.72);
+  --ios-hairline: rgba(255, 255, 255, 0.13);
+  --ios-fill: rgba(118, 118, 128, 0.3);
 }
 
 :root[data-theme='light'] {
@@ -85,7 +89,10 @@
   --accent-soft: rgba(169, 114, 44, 0.1);
 
   --shadow-card: 0 26px 48px -30px rgba(60, 45, 30, 0.35), 0 10px 22px -18px rgba(60, 45, 30, 0.22);
-  --grid-line: rgba(22, 20, 25, 0.12);
+
+  --ios-bar: rgba(249, 249, 249, 0.78);
+  --ios-hairline: rgba(0, 0, 0, 0.14);
+  --ios-fill: rgba(118, 118, 128, 0.12);
 }
 
 *,
@@ -166,6 +173,11 @@ input {
   border-radius: var(--radius-pill);
   border: 2px solid transparent;
   background-clip: padding-box;
+}
+
+/* 搜索栏吸顶时与顶栏拼成一整块，去掉中间那条发丝线 */
+body:has(.bar--stuck) .nav--scrolled {
+  box-shadow: none;
 }
 
 .visually-hidden {

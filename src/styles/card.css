@@ -2,13 +2,6 @@
    卡片：外层锚点只占「露出的那一条」，牌面绝对定位向下溢出、
    被下一张牌压住。这就是牌包里那一叠的手感。
    悬停只让牌面横向移出、锚点不动，因此命中区域恒定，不会闪进闪出。
-
-   牌面本身是一块液态玻璃：
-     aura   —— 同色光晕，给玻璃提供颜色来源
-     glass  —— backdrop-filter 模糊 + 提饱和
-     lens   —— SVG 位移贴图，边缘折射 + 色散（仅宽屏）
-     tint   —— 色相、内阴影、边缘亮线
-     sheen  —— 跟随指针的镜面高光
    ══════════════════════════════════════════════════════════ */
 
 .card {
@@ -16,14 +9,9 @@
   --ratio-h: var(--card-ratio-h, 16);
   /* 露出比例：只露角落那一条 */
   --band: 0.19;
-  /* 抽出量：相对牌面自身宽度，横向抽出 20% 卡宽 */
+  /* 抽出量：相对牌面自身宽度，横向抽出 20% 卡宽，
+     正好填满牌堆左侧预留的那条空档 */
   --lift: -20%;
-  /* 玻璃层向外扩出的边距，必须 ≥ 折射带宽度 */
-  --lens-pad: 34px;
-  --glass-blur: 10px;
-  --glass-sat: 112%;
-  --mx: 24%;
-  --my: 0%;
 
   position: relative;
   display: block;
@@ -39,14 +27,14 @@
   padding-top: calc(100% * var(--ratio-h) / var(--ratio-w));
 }
 
-@keyframes dealIn {
-  from {
-    opacity: 0;
-    transform: translate3d(var(--fan, 0px), 16px, 0) rotate(calc(var(--tilt, 0deg) * 2.2));
+@media (min-width: 720px) {
+  .card:hover .card__face,
+  .card:focus-visible .card__face {
+    will-change: transform;
   }
 }
 
-/* ── 牌面：玻璃容器 ───────────────────────────────────── */
+/* 真正的牌面：宽度撑满锚点，高度按比例推导 */
 .card__face {
   position: absolute;
   top: 0;
@@ -54,84 +42,69 @@
   right: 0;
   aspect-ratio: var(--ratio-w) / var(--ratio-h);
   border-radius: var(--radius-card);
-  /* 玻璃层比牌面大一圈，边缘折射才有东西可以采样 */
   overflow: hidden;
-  transform: translate3d(0, 0, 0) rotate(var(--tilt, 0deg));
-  transform-origin: 50% 92%;
-  transition: transform 480ms var(--ease-spring), box-shadow 420ms var(--ease-out);
-  animation: dealIn 640ms var(--ease-out) backwards;
-  animation-delay: calc(var(--i, 0) * 70ms);
-  box-shadow: 0 34px 58px -38px rgba(0, 0, 0, 0.95), 0 14px 28px -20px rgba(0, 0, 0, 0.7),
-    0 0 64px -40px hsl(var(--hue) 90% 55% / 0.85);
-}
-
-/* 同色光晕：藏在玻璃底下，卡片因此还是自己的颜色 */
-.card__aura {
-  position: absolute;
-  inset: -10% -6%;
-  z-index: 0;
-  border-radius: calc(var(--radius-card) + 40px);
-  background: radial-gradient(
-    closest-side,
-    hsl(var(--hue) 95% 62% / 0.42),
-    hsl(var(--hue) 92% 50% / 0.18) 56%,
-    transparent 78%
-  );
-  filter: blur(34px);
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-/* 模糊层 */
-.card__glass {
-  position: absolute;
-  inset: calc(var(--lens-pad) * -1);
-  z-index: 1;
-  border-radius: calc(var(--radius-card) + var(--lens-pad));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.05);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.05);
-  pointer-events: none;
-}
-
-/* 折射层：backdrop-filter 由脚本挂上去，不支持时自动留空 */
-.card__lens {
-  position: absolute;
-  inset: calc(var(--lens-pad) * -1);
-  z-index: 2;
-  border-radius: calc(var(--radius-card) + var(--lens-pad));
-  pointer-events: none;
-}
-
-/* 色相 + 边缘光 + 内阴影 */
-.card__tint {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-      120% 140% at 0% 0%,
-      hsl(var(--hue) 95% 74% / 0.16),
-      transparent 62%
-    ),
+  border: 1px solid hsl(var(--hue) 70% 66% / 0.28);
+  background: radial-gradient(120% 130% at 0% 0%, hsl(var(--hue) 96% 68% / 0.32), transparent 60%),
     linear-gradient(
       158deg,
-      hsl(var(--hue) 88% 58% / 0.18) 0%,
-      hsl(var(--hue) 82% 44% / 0.09) 52%,
-      hsl(var(--hue) 76% 34% / 0.15) 100%
+      hsl(var(--hue) 55% 30%) 0%,
+      hsl(var(--hue) 50% 19%) 52%,
+      hsl(var(--hue) 42% 13%) 100%
     );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 1px 0 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 hsl(var(--hue) 85% 72% / 0.3), inset -1px 0 0 rgba(255, 255, 255, 0.09),
-    inset 0 0 42px -16px hsl(var(--hue) 95% 68% / 0.7),
-    inset 0 -60px 70px -60px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 420ms var(--ease-out);
+  box-shadow: 0 22px 40px -26px hsl(var(--hue) 85% 25% / 0.9),
+    0 10px 20px -12px rgba(0, 0, 0, 0.45), inset 0 1px 0 hsl(var(--hue) 90% 85% / 0.14);
+  transform: translate3d(0, 0, 0) rotate(var(--tilt, 0deg));
+  transform-origin: 50% 92%;
+  transition: transform 480ms var(--ease-spring), box-shadow 380ms var(--ease-out),
+    border-color 380ms var(--ease-out);
+  animation: dealIn 640ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-/* 牌心编号：像扑克牌正中的那枚图案，被压住也无所谓 */
+:root[data-theme='light'] .card__face {
+  background: radial-gradient(120% 130% at 0% 0%, hsl(var(--hue) 92% 66% / 0.24), transparent 58%),
+    linear-gradient(
+      158deg,
+      hsl(var(--hue) 85% 97%) 0%,
+      hsl(var(--hue) 75% 93%) 52%,
+      hsl(var(--hue) 62% 88%) 100%
+    );
+  box-shadow: 0 22px 40px -28px hsl(var(--hue) 60% 40% / 0.5),
+    0 10px 20px -14px rgba(20, 20, 32, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* 悬停时扫过牌面的一道光 */
+.card__face::before {
+  content: '';
+  position: absolute;
+  inset: -30% -35%;
+  z-index: 3;
+  background: linear-gradient(
+    112deg,
+    transparent 40%,
+    hsl(var(--hue) 100% 94% / 0.14) 49%,
+    transparent 58%
+  );
+  transform: translate3d(-60%, 0, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 760ms var(--ease-out), opacity 320ms var(--ease-out);
+}
+
+/* 牌的内框线 */
+.card__frame {
+  position: absolute;
+  inset: 10px;
+  border-radius: calc(var(--radius-card) - 8px);
+  border: 1px solid hsl(var(--hue) 80% 78% / 0.13);
+  pointer-events: none;
+  transition: border-color 380ms var(--ease-out);
+}
+
+/* 牌心的编号：像扑克牌正中的那枚图案，居中铺满 */
 .card__series {
   position: absolute;
   inset: 0;
-  z-index: 4;
   display: grid;
   place-items: center;
   font-family: var(--font-sans);
@@ -140,40 +113,15 @@
   font-style: italic;
   line-height: 1;
   letter-spacing: -0.04em;
-  color: hsl(var(--hue) 92% 88% / 0.05);
+  color: hsl(var(--hue) 92% 86% / 0.075);
   pointer-events: none;
   user-select: none;
   /* 斜体的字形重心偏右下，往反方向补一点才真正居中 */
   transform: translate(-0.04em, -0.02em) rotate(-7deg);
   transition: color 420ms var(--ease-out), transform 620ms var(--ease-spring);
 }
-
-/* 镜面高光：跟着指针走 */
-.card__sheen {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  opacity: 0.6;
-  background: radial-gradient(
-      240px circle at var(--mx) var(--my),
-      hsl(var(--hue) 100% 94% / 0.3),
-      transparent 62%
-    ),
-    linear-gradient(164deg, rgba(255, 255, 255, 0.14), transparent 40%);
-  transition: opacity 320ms var(--ease-out);
-}
-
-/* 牌的内框线 */
-.card__frame {
-  position: absolute;
-  inset: 9px;
-  z-index: 6;
-  border-radius: calc(var(--radius-card) - 7px);
-  border: 1px solid hsl(var(--hue) 80% 82% / 0.12);
-  pointer-events: none;
+:root[data-theme='light'] .card__series {
+  color: hsl(var(--hue) 62% 34% / 0.09);
 }
 
 /* 信息区横贯牌顶：名称靠左，图标靠右，叠放时这一整行必须看清。
@@ -182,13 +130,14 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 7;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
   width: 100%;
   height: 19%;
+  /* 名称靠左、图标靠右，两侧留同样的呼吸位 */
   padding: 0 26px 0 24px;
 }
 
@@ -200,16 +149,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* 首字放大：中文读作一枚「领字」，英文读作起笔 */
 .card__name::first-letter {
   font-size: 1.3em;
   font-weight: 720;
-  color: hsl(var(--hue) 100% 92% / 0.96);
+  color: hsl(var(--hue) 100% 90% / 0.95);
   margin-right: 0.03em;
-  text-shadow: 0 2px 12px hsl(var(--hue) 90% 60% / 0.45);
+  text-shadow: 0 2px 12px hsl(var(--hue) 90% 60% / 0.4);
+}
+:root[data-theme='light'] .card__name::first-letter {
+  color: hsl(var(--hue) 72% 38%);
+  text-shadow: none;
 }
 
 .card__icon {
@@ -247,72 +199,10 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* ── 浅色主题：牛奶玻璃 ───────────────────────────────── */
-:root[data-theme='light'] .card__face {
-  box-shadow: 0 30px 50px -34px hsl(var(--hue) 55% 45% / 0.5),
-    0 12px 22px -18px rgba(20, 20, 32, 0.16), 0 0 60px -42px hsl(var(--hue) 70% 60% / 0.7);
-}
-
-:root[data-theme='light'] .card__aura {
-  background: radial-gradient(
-    closest-side,
-    hsl(var(--hue) 92% 70% / 0.55),
-    hsl(var(--hue) 88% 62% / 0.22) 56%,
-    transparent 78%
-  );
-}
-
-:root[data-theme='light'] .card__tint {
-  background: radial-gradient(
-      120% 140% at 0% 0%,
-      hsl(var(--hue) 96% 99% / 0.72),
-      transparent 60%
-    ),
-    linear-gradient(
-      158deg,
-      hsl(var(--hue) 90% 98% / 0.7) 0%,
-      hsl(var(--hue) 78% 94% / 0.58) 52%,
-      hsl(var(--hue) 68% 88% / 0.62) 100%
-    );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 1px 0 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.55), inset -1px 0 0 rgba(255, 255, 255, 0.45),
-    inset 0 22px 40px -30px rgba(255, 255, 255, 0.95),
-    inset 0 -60px 70px -60px rgba(90, 70, 40, 0.22);
-}
-
-:root[data-theme='light'] .card__series {
-  color: hsl(var(--hue) 62% 34% / 0.09);
-}
-
-:root[data-theme='light'] .card__sheen {
-  mix-blend-mode: soft-light;
-  opacity: 0.75;
-  background: radial-gradient(
-      240px circle at var(--mx) var(--my),
-      rgba(255, 255, 255, 0.55),
-      transparent 62%
-    ),
-    linear-gradient(164deg, rgba(255, 255, 255, 0.4), transparent 40%);
-}
-
-:root[data-theme='light'] .card__frame {
-  border-color: hsl(var(--hue) 60% 50% / 0.12);
-}
-
-:root[data-theme='light'] .card__name {
-  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.5);
-}
-
-:root[data-theme='light'] .card__name::first-letter {
-  color: hsl(var(--hue) 72% 36%);
-  text-shadow: none;
-}
-
 /* ── 宽屏：16:9 横卡 ───────────────────────────────────── */
 @media (min-width: 720px) {
   .card {
     --band: 0.3;
-    --glass-blur: 11px;
   }
 
   .card__corner {
@@ -350,22 +240,17 @@
 @media (min-width: 720px) {
   .card:hover .card__face,
   .card:focus-visible .card__face {
+    /* 整张向左抽出，填满左侧车道；纵向下移不动，仍被下一张压住 */
     transform: translate3d(var(--lift), 0, 0) rotate(0deg);
-    box-shadow: 0 38px 64px -36px rgba(0, 0, 0, 0.95), 0 16px 30px -20px rgba(0, 0, 0, 0.7),
-      0 0 90px -34px hsl(var(--hue) 92% 60% / 0.95);
+    border-color: hsl(var(--hue) 85% 72% / 0.5);
+    box-shadow: 0 26px 46px -24px hsl(var(--hue) 85% 28% / 0.95),
+      0 12px 22px -14px rgba(0, 0, 0, 0.5), 0 0 0 1px hsl(var(--hue) 85% 72% / 0.2),
+      inset 0 1px 0 hsl(var(--hue) 95% 88% / 0.18);
   }
 
-  .card:hover .card__tint,
-  .card:focus-visible .card__tint {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.64), inset 1px 0 0 rgba(255, 255, 255, 0.22),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.16), inset -1px 0 0 rgba(255, 255, 255, 0.1),
-      inset 0 22px 44px -28px rgba(255, 255, 255, 0.55),
-      inset 0 -60px 70px -60px rgba(0, 0, 0, 0.55);
-  }
-
-  .card:hover .card__sheen,
-  .card:focus-visible .card__sheen {
+  .card:hover .card__face::before {
     opacity: 1;
+    transform: translate3d(55%, 0, 0);
   }
 
   .card:hover .card__icon {
@@ -377,26 +262,30 @@
     transform: translate(-0.04em, -0.02em) rotate(0deg) scale(1.02);
   }
 
-  :root[data-theme='light'] .card:hover .card__face,
-  :root[data-theme='light'] .card:focus-visible .card__face {
-    box-shadow: 0 34px 56px -32px hsl(var(--hue) 55% 45% / 0.5),
-      0 14px 26px -18px rgba(20, 20, 32, 0.2), 0 0 70px -38px hsl(var(--hue) 70% 58% / 0.85);
+  :root[data-theme='light'] .card:hover .card__face {
+    box-shadow: 0 26px 46px -26px hsl(var(--hue) 60% 40% / 0.45),
+      0 12px 22px -16px rgba(20, 20, 32, 0.22), 0 0 0 1px hsl(var(--hue) 70% 60% / 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
   }
-
   :root[data-theme='light'] .card:hover .card__series {
     color: hsl(var(--hue) 62% 34% / 0.13);
   }
 
   .card:focus-visible .card__face {
-    box-shadow: 0 0 0 3px hsl(var(--hue) 90% 66% / 0.45),
-      0 34px 58px -34px rgba(0, 0, 0, 0.9),
-      0 0 70px -34px hsl(var(--hue) 90% 60% / 0.9);
+    box-shadow: 0 0 0 3px hsl(var(--hue) 90% 66% / 0.4),
+      0 26px 44px -24px hsl(var(--hue) 85% 28% / 0.9);
+  }
+}
+
+@keyframes dealIn {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fan, 0px), 16px, 0) rotate(calc(var(--tilt, 0deg) * 2.2));
   }
 }
 
 /* ── 窄屏：只保留发牌动画 ───────────────────────────────
-   位移与过渡全关，触屏不会有悬停/按下回弹；进场这一下仍然保留。
-   玻璃只留模糊，不跑 SVG 折射，省电也省帧 */
+   位移与过渡全关，触屏不会有悬停/按下回弹；进场这一下仍然保留 */
 @media (max-width: 719.98px) {
   .card__face {
     transition: none;
@@ -408,9 +297,9 @@
     transition: none;
   }
 
-  .card {
-    --glass-blur: 14px;
-    --glass-sat: 165%;
+  /* 扫光那道高光是给鼠标准备的，触屏没有 hover，直接去掉 */
+  .card__face::before {
+    display: none;
   }
 }
 
@@ -418,7 +307,7 @@
   .card__face,
   .card__icon,
   .card__series,
-  .card__sheen {
+  .card__face::before {
     animation: none !important;
     transition: none !important;
   }
